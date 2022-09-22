@@ -13,5 +13,5 @@ fn init(mut commands: Commands) {
     let board = board::ChessBoard::new();
     commands.spawn_bundle(Camera2dBundle::default());
     commands.spawn().insert(board);
-}
+}   
 
