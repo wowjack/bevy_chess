@@ -1,32 +1,6 @@
-use bevy::prelude::*;
+use bevy::prelude::{*, Color};
 
-#[derive(Component, Debug)]
-pub struct ChessBoard {
-    pieces: Vec<ChessPiece>
-}
-
-impl ChessBoard {
-    pub fn new() -> Self {
-        let mut p = Vec::new();
-        
-        for i in 1..=8 {
-            p.push(ChessPiece::pawn(Color::White, (i, 2)));
-            p.push(ChessPiece::pawn(Color::Black, (i, 7)));
-            match i {
-                1 | 8 => { p.push(ChessPiece::rook(Color::White, (i, 1))); p.push(ChessPiece::rook(Color::Black, (i, 8))) },
-                2 | 7 => { p.push(ChessPiece::knight(Color::White, (i, 1))); p.push(ChessPiece::knight(Color::Black, (i, 8))) },
-                3 | 6 => { p.push(ChessPiece::bishop(Color::White, (i, 1))); p.push(ChessPiece::bishop(Color::Black, (i, 8))) },
-                4 => { p.push(ChessPiece::queen(Color::White, (i, 1))); p.push(ChessPiece::queen(Color::Black, (i, 8))) },
-                5 => { p.push(ChessPiece::king(Color::White, (i, 1))); p.push(ChessPiece::king(Color::Black, (i, 8))) },
-                _ => panic!("Failed to create new chess board")
-            }
-        }
-        
-        Self{ pieces: p }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Component)]
+#[derive(Clone, Copy, Component)]
 struct ChessPiece {
     color: Color,
     piece: Pieces,
@@ -54,7 +28,7 @@ impl ChessPiece {
 }
 
 #[derive(Clone, Copy, Debug)]
-enum Color {
+enum ChessColor {
     White,
     Black
 }
@@ -69,3 +43,41 @@ enum Pieces {
     King
 }
 
+#[derive(Component)]
+pub(crate) struct BoardInfo{
+    pub size: u16,
+    pub position: Vec2
+}
+impl BoardInfo {
+    pub(crate) fn default() -> Self {
+        Self {
+            size: 500,
+            position: Vec2::new(0., 0.)
+        }
+    }
+}
+
+#[derive(Component)]
+pub(crate) struct BoardTile {
+    pub position: (u8, u8)
+}
+impl BoardTile {
+    pub(crate) fn new(x: u8, y: u8) -> Self {
+        Self { position: (x, y) }
+    }
+    pub(crate) fn make_sprite(x: u8, y: u8, board_size: u16) -> SpriteBundle {
+        let color = if (x+y)%2==0 {Color::BLACK} else {Color::BEIGE};
+        SpriteBundle {
+            sprite: Sprite {
+                color,
+                ..Sprite::default()
+            },
+            transform: Transform {
+                translation: Vec3::new((board_size/8 * x as u16) as f32, (board_size/8 * y as u16) as f32, 1.),
+                scale: Vec3::new(board_size as f32/8., board_size as f32/8., 1.),
+                ..Transform::default()
+            },
+            ..SpriteBundle::default()
+        }
+    }
+}
