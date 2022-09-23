@@ -1,40 +1,40 @@
 use bevy::prelude::{*, Color};
 
 #[derive(Clone, Copy, Component)]
-struct ChessPiece {
-    color: Color,
-    piece: Pieces,
-    position: (u8, u8)
+pub struct ChessPiece {
+    pub color: ChessColor,
+    pub piece: Pieces,
+    pub position: (u8, u8)
 }
 impl ChessPiece {
-    fn pawn(color: Color, position: (u8, u8)) -> Self {
+    pub fn pawn(color: ChessColor, position: (u8, u8)) -> Self {
         Self { color, piece: Pieces::Pawn, position }
     }
-    fn knight(color: Color, position: (u8, u8)) -> ChessPiece {
+    pub fn knight(color: ChessColor, position: (u8, u8)) -> ChessPiece {
         Self { color, piece: Pieces::Knight, position }
     }
-    fn bishop(color: Color, position: (u8, u8)) -> ChessPiece {
+    pub fn bishop(color: ChessColor, position: (u8, u8)) -> ChessPiece {
         Self { color, piece: Pieces::Bishop, position }
     }
-    fn rook(color: Color, position: (u8, u8)) -> ChessPiece {
+    pub fn rook(color: ChessColor, position: (u8, u8)) -> ChessPiece {
         Self { color, piece: Pieces::Rook, position }
     }
-    fn queen(color: Color, position: (u8, u8)) -> ChessPiece {
+    pub fn queen(color: ChessColor, position: (u8, u8)) -> ChessPiece {
         Self { color, piece: Pieces::Queen, position }
     }
-    fn king(color: Color, position: (u8, u8)) -> ChessPiece {
+    pub fn king(color: ChessColor, position: (u8, u8)) -> ChessPiece {
         Self { color, piece: Pieces::King, position }
     }
 }
 
 #[derive(Clone, Copy, Debug)]
-enum ChessColor {
+pub enum ChessColor {
     White,
     Black
 }
 
 #[derive(Clone, Copy, Debug)]
-enum Pieces {
+pub enum Pieces {
     Pawn,
     Knight,
     Bishop,

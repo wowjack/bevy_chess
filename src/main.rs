@@ -22,6 +22,7 @@ fn spawn_new_board(mut commands: Commands) {
             .insert(board_info)
             .insert_bundle(SpriteBundle {
                 transform: Transform {
+                    translation: Vec3::new(-200., -200., 1.),
                     scale: Vec3::new(1., 1., 1.),
                     ..default()
                 },
@@ -33,6 +34,28 @@ fn spawn_new_board(mut commands: Commands) {
                         parent.spawn_bundle(BoardTile::make_sprite(x, y, board_size))
                         .insert(BoardTile::new(x, y));
                     }
+                    //spawn black pawns
+                    parent.spawn()
+                        .insert(ChessPiece::pawn(ChessColor::Black, (y, 7)))
+                        .insert_bundle(SpriteBundle {
+                            transform: Transform {
+                                translation: Vec3::new((board_size as f32/8. * y as f32) as f32, (board_size as f32/8. * 6.) as f32, 1.),
+                                scale: Vec3::new(board_size as f32/12., board_size as f32/12., 1.),
+                                ..default()
+                            },
+                            ..default()
+                        });
+                    //spawn white pawns
+                    parent.spawn()
+                        .insert(ChessPiece::pawn(ChessColor::White, (y, 8)))
+                        .insert_bundle(SpriteBundle {
+                            transform: Transform {
+                                translation: Vec3::new((board_size as f32/8. * y as f32) as f32, (board_size as f32/8. * 1.) as f32, 1.),
+                                scale: Vec3::new(board_size as f32/12., board_size as f32/12., 1.),
+                                ..default()
+                            },
+                            ..default()
+                        });
                 }
                 
             });
