@@ -10,6 +10,20 @@ impl ChessPiece {
     pub fn pawn(color: ChessColor, position: (u8, u8)) -> Self {
         Self { color, piece: Pieces::Pawn, position }
     }
+    pub fn pawn_sprite(color: ChessColor, position: (u8, u8), board_size: u16) -> SpriteBundle {
+        SpriteBundle {
+            sprite: Sprite {
+                color: match color {ChessColor::White => Color::WHITE, ChessColor::Black => Color::GRAY},
+                ..default()
+            },
+            transform: Transform {
+                translation: Vec3::new(board_size as f32/8. * position.0 as f32, board_size as f32/8. * position.1 as f32, 1.),
+                scale: Vec3::new(board_size as f32/12., board_size as f32/12., 1.),
+                ..default()
+            },
+            ..default()
+        }
+    }
     pub fn knight(color: ChessColor, position: (u8, u8)) -> ChessPiece {
         Self { color, piece: Pieces::Knight, position }
     }
@@ -73,7 +87,7 @@ impl BoardTile {
                 ..Sprite::default()
             },
             transform: Transform {
-                translation: Vec3::new((board_size/8 * x as u16) as f32, (board_size/8 * y as u16) as f32, 1.),
+                translation: Vec3::new(board_size as f32/8. * x as f32, board_size as f32/8. * y as f32, 1.),
                 scale: Vec3::new(board_size as f32/8., board_size as f32/8., 1.),
                 ..Transform::default()
             },
