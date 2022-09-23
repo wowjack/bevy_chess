@@ -7,22 +7,22 @@ pub struct ChessPiece {
     pub position: (u8, u8)
 }
 impl ChessPiece {
-    pub fn pawn(color: ChessColor, position: (u8, u8)) -> Self {
-        Self { color, piece: Pieces::Pawn, position }
-    }
-    pub fn pawn_sprite(color: ChessColor, position: (u8, u8), board_size: u16) -> SpriteBundle {
+    pub fn piece_sprite(color: ChessColor, position: (u8, u8), board_size: u16, texture: Handle<Image>) -> SpriteBundle {
         SpriteBundle {
+            texture,
             sprite: Sprite {
-                color: match color {ChessColor::White => Color::WHITE, ChessColor::Black => Color::GRAY},
+                custom_size: Some(Vec2::new(board_size as f32/12., board_size as f32/12.)),
                 ..default()
             },
             transform: Transform {
                 translation: Vec3::new(board_size as f32/8. * position.0 as f32, board_size as f32/8. * position.1 as f32, 1.),
-                scale: Vec3::new(board_size as f32/12., board_size as f32/12., 1.),
                 ..default()
             },
             ..default()
         }
+    }
+    pub fn pawn(color: ChessColor, position: (u8, u8)) -> Self {
+        Self { color, piece: Pieces::Pawn, position }
     }
     pub fn knight(color: ChessColor, position: (u8, u8)) -> ChessPiece {
         Self { color, piece: Pieces::Knight, position }
