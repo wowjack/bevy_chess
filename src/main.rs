@@ -54,51 +54,51 @@ fn spawn_new_board(mut commands: Commands, asset_server: Res<AssetServer>) {
                     //spawn black pawns
                     parent.spawn()
                         .insert(ChessPiece::pawn(ChessColor::Black, (y, 6)))
-                        .insert_bundle(ChessPiece::piece_sprite(ChessColor::Black, (y,6), board_size, b_pawn.clone()));
+                        .insert_bundle(ChessPiece::piece_sprite((y,6), board_size, b_pawn.clone()));
                     //spawn white pawns
                     parent.spawn()
                         .insert(ChessPiece::pawn(ChessColor::White, (y, 1)))
-                        .insert_bundle(ChessPiece::piece_sprite(ChessColor::White, (y,1), board_size, w_pawn.clone()));
+                        .insert_bundle(ChessPiece::piece_sprite((y,1), board_size, w_pawn.clone()));
                     match y {
                         0 | 7 => {
                             parent.spawn()
                                 .insert(ChessPiece::rook(ChessColor::Black, (y, 7)))
-                                .insert_bundle(ChessPiece::piece_sprite(ChessColor::Black, (y,7), board_size, b_rook.clone()));
+                                .insert_bundle(ChessPiece::piece_sprite((y,7), board_size, b_rook.clone()));
                             parent.spawn()
                                 .insert(ChessPiece::rook(ChessColor::White, (y, 0)))
-                                .insert_bundle(ChessPiece::piece_sprite(ChessColor::White, (y,0), board_size, w_rook.clone()));
+                                .insert_bundle(ChessPiece::piece_sprite((y,0), board_size, w_rook.clone()));
                             },
                         1 | 6 => {
                             parent.spawn()
                                 .insert(ChessPiece::knight(ChessColor::Black, (y, 7)))
-                                .insert_bundle(ChessPiece::piece_sprite(ChessColor::Black, (y,7), board_size, b_knight.clone()));
+                                .insert_bundle(ChessPiece::piece_sprite((y,7), board_size, b_knight.clone()));
                             parent.spawn()
                                 .insert(ChessPiece::knight(ChessColor::White, (y, 0)))
-                                .insert_bundle(ChessPiece::piece_sprite(ChessColor::White, (y,0), board_size, w_knight.clone()));
+                                .insert_bundle(ChessPiece::piece_sprite((y,0), board_size, w_knight.clone()));
                             },
                         2 | 5 => {
                             parent.spawn()
                                 .insert(ChessPiece::bishop(ChessColor::Black, (y, 7)))
-                                .insert_bundle(ChessPiece::piece_sprite(ChessColor::Black, (y,7), board_size, b_bishop.clone()));
+                                .insert_bundle(ChessPiece::piece_sprite((y,7), board_size, b_bishop.clone()));
                             parent.spawn()
                                 .insert(ChessPiece::bishop(ChessColor::White, (y, 0)))
-                                .insert_bundle(ChessPiece::piece_sprite(ChessColor::White, (y,0), board_size, w_bishop.clone()));
+                                .insert_bundle(ChessPiece::piece_sprite((y,0), board_size, w_bishop.clone()));
                             },
                         3 => {
                             parent.spawn()
                                 .insert(ChessPiece::queen(ChessColor::Black, (y, 7)))
-                                .insert_bundle(ChessPiece::piece_sprite(ChessColor::Black, (y,7), board_size, b_queen.clone()));
+                                .insert_bundle(ChessPiece::piece_sprite((y,7), board_size, b_queen.clone()));
                             parent.spawn()
                                 .insert(ChessPiece::queen(ChessColor::White, (y, 0)))
-                                .insert_bundle(ChessPiece::piece_sprite(ChessColor::White, (y,0), board_size, w_queen.clone()));
+                                .insert_bundle(ChessPiece::piece_sprite((y,0), board_size, w_queen.clone()));
                             },
                         4 => {
                             parent.spawn()
                                 .insert(ChessPiece::king(ChessColor::Black, (y, 7)))
-                                .insert_bundle(ChessPiece::piece_sprite(ChessColor::Black, (y,7), board_size, b_king.clone()));
+                                .insert_bundle(ChessPiece::piece_sprite((y,7), board_size, b_king.clone()));
                             parent.spawn()
                                 .insert(ChessPiece::king(ChessColor::White, (y, 0)))
-                                .insert_bundle(ChessPiece::piece_sprite(ChessColor::White, (y,0), board_size, w_king.clone()));
+                                .insert_bundle(ChessPiece::piece_sprite((y,0), board_size, w_king.clone()));
                             },
                         _ => panic!("Invalid chess piece spawn.")
                     }

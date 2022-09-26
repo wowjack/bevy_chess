@@ -7,7 +7,7 @@ pub struct ChessPiece {
     pub position: (u8, u8)
 }
 impl ChessPiece {
-    pub fn piece_sprite(color: ChessColor, position: (u8, u8), board_size: u16, texture: Handle<Image>) -> SpriteBundle {
+    pub fn piece_sprite(position: (u8, u8), board_size: u16, texture: Handle<Image>) -> SpriteBundle {
         SpriteBundle {
             texture,
             sprite: Sprite {
@@ -72,6 +72,7 @@ impl BoardInfo {
 }
 
 #[derive(Component)]
+#[allow(unused)]
 pub(crate) struct BoardTile {
     pub position: (u8, u8)
 }
