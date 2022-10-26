@@ -7,7 +7,21 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_startup_system(init)
         .add_startup_system(spawn_new_board)
+        .add_system(move_pieces)
         .run();
+}
+
+fn move_pieces(mut piece_query: Query<(&board::ChessPiece, &mut Transform)>, mouse_buttons: Res<Input<MouseButton>>, windows: Res<Windows>) {
+    let window = windows.get_primary().unwrap();
+    let cursor_pos = window.cursor_position();
+
+    if (mouse_buttons.just_pressed(MouseButton::Left)) {
+        for (piece, mut transform) in piece_query.iter_mut() {
+            if let Some(position) = cursor_pos {
+
+            }
+        }
+    }
 }
 
 fn init(mut commands: Commands) {
