@@ -11,14 +11,22 @@ fn main() {
         .run();
 }
 
-fn move_pieces(mut piece_query: Query<(&board::ChessPiece, &mut Transform)>, mouse_buttons: Res<Input<MouseButton>>, windows: Res<Windows>) {
+#[derive(Component)]
+struct SelectedPiece {
+    piece: Option<&'static board::ChessPiece>,
+    transform: Option<&'static mut Transform>
+}
+
+fn move_pieces(mut piece_query: Query<(&board::ChessPiece, &mut Transform)>, mut selected_query: Query<&mut SelectedPiece>, mouse_buttons: Res<Input<MouseButton>>, windows: Res<Windows>) {
     let window = windows.get_primary().unwrap();
     let cursor_pos = window.cursor_position();
+
+    let mut selected_piece = selected_query.get_single_mut().unwrap();
 
     if (mouse_buttons.just_pressed(MouseButton::Left)) {
         for (piece, mut transform) in piece_query.iter_mut() {
             if let Some(position) = cursor_pos {
-
+                //check if position of mouse during press is within any pieces transforms.
             }
         }
     }
@@ -118,5 +126,9 @@ fn spawn_new_board(mut commands: Commands, asset_server: Res<AssetServer>) {
                     }
                 }
             });
+    commands.spawn().insert(SelectedPiece {
+        piece: None,
+        transform: None
+    });
 }
 
