@@ -1,24 +1,23 @@
 use bevy::prelude::*;
-use board::Pieces;
 
 mod board;
+mod common;
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_startup_system(init)
         .add_startup_system(spawn_new_board)
-        .add_system(move_pieces)
+        .add_system(click_pieces)
         .run();
 }
 
-#[derive(Component)]
-struct SelectedPiece {
-    piece: Option<&'static board::ChessPiece>,
-    transform: Option<&'static mut Transform>
-}
-
-fn move_pieces(mut piece_query: Query<(&board::ChessPiece, &mut GlobalTransform, &Sprite)>, mut selected_query: Query<&mut SelectedPiece>, camera_query: Query<(&Camera, &GlobalTransform), Without<board::ChessPiece>>, mouse_buttons: Res<Input<MouseButton>>, windows: Res<Windows>) {
+fn click_pieces(
+    piece_query: Query<(&board::ChessPiece, &GlobalTransform, &Sprite)>,
+    camera_query: Query<(&Camera, &GlobalTransform), Without<board::ChessPiece>>,
+    mouse_buttons: Res<Input<MouseButton>>,
+    windows: Res<Windows>
+) {
     let window = windows.get_primary().unwrap();
     let mut cursor_pos = match window.cursor_position() {
         Some(pos) => pos,
@@ -27,27 +26,23 @@ fn move_pieces(mut piece_query: Query<(&board::ChessPiece, &mut GlobalTransform,
     cursor_pos.x -= window.width()/2.;
     cursor_pos.y -= window.height()/2.;
 
-    let mut selected_piece = selected_query.get_single_mut().unwrap();
-
     if mouse_buttons.just_pressed(MouseButton::Left) {
-        let pos = mouse_pos_to_global(window, camera_query.single());
-        for (piece, transform, sprite) in piece_query.iter_mut() {
+        let pos = common::mouse_pos_to_global(window, camera_query.single());
+        for (piece, transform, sprite) in piece_query.iter() {
             let piece_info = transform.to_scale_rotation_translation();
             let sprite_width = sprite.custom_size.unwrap().x;
             let sprite_height = sprite.custom_size.unwrap().y;
-            if pos.x > piece_info.2.x-sprite_width/2. && pos.x < piece_info.2.x+sprite_width/2. && pos.y > piece_info.2.y-sprite_height/2. && pos.y < piece_info.2.y+sprite_height/2. {
-                println!("clicked piece {:?} {:?}", piece.color, piece.piece);
+            if pos.x > piece_info.2.x-sprite_width/2. &&
+                pos.x < piece_info.2.x+sprite_width/2. &&
+                pos.y > piece_info.2.y-sprite_height/2. &&
+                pos.y < piece_info.2.y+sprite_height/2. 
+            {
+                println!("clicked piece {:?} {:?} at {:?}", piece.color, piece.piece, piece.position);
+                //send piece clicked event
+                return;
             }
         }
     }
-}
-
-fn mouse_pos_to_global(window: &Window, (camera, camera_transform): (&Camera, &GlobalTransform)) -> Vec2 {
-    let window_size = Vec2::new(window.width() as f32, window.height() as f32);
-    let ndc = (window.cursor_position().unwrap() / window_size) * 2.0 - Vec2::ONE;
-    let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
-    let world_pos = ndc_to_world.project_point3(ndc.extend(-1.0)).truncate();
-    return world_pos;
 }
 
 fn init(mut commands: Commands) {
@@ -144,7 +139,7 @@ fn spawn_new_board(mut commands: Commands, asset_server: Res<AssetServer>) {
                     }
                 }
             });
-    commands.spawn().insert(SelectedPiece {
+    commands.spawn().insert(board::SelectedPiece {
         piece: None,
         transform: None
     });

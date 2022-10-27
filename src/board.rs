@@ -96,3 +96,9 @@ impl BoardTile {
         }
     }
 }
+
+#[derive(Component)]
+pub(crate) struct SelectedPiece {
+    pub piece: Option<&'static ChessPiece>,
+    pub transform: Option<&'static mut Transform>
+}
