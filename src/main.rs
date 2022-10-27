@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use board::Pieces;
 
 mod board;
 
@@ -17,17 +18,20 @@ struct SelectedPiece {
     transform: Option<&'static mut Transform>
 }
 
-fn move_pieces(mut piece_query: Query<(&board::ChessPiece, &mut Transform)>, mut selected_query: Query<&mut SelectedPiece>, mouse_buttons: Res<Input<MouseButton>>, windows: Res<Windows>) {
+fn move_pieces(mut piece_query: Query<(&board::ChessPiece, &mut GlobalTransform)>, mut selected_query: Query<&mut SelectedPiece>, mouse_buttons: Res<Input<MouseButton>>, windows: Res<Windows>) {
     let window = windows.get_primary().unwrap();
-    let cursor_pos = window.cursor_position();
+    let mut cursor_pos = match window.cursor_position() {
+        Some(pos) => pos,
+        None => Vec2::default()
+    };
+    cursor_pos.x -= window.width()/2.;
+    cursor_pos.y -= window.height()/2.;
 
     let mut selected_piece = selected_query.get_single_mut().unwrap();
 
-    if (mouse_buttons.just_pressed(MouseButton::Left)) {
-        for (piece, mut transform) in piece_query.iter_mut() {
-            if let Some(position) = cursor_pos {
-                //check if position of mouse during press is within any pieces transforms.
-            }
+    if mouse_buttons.just_pressed(MouseButton::Left) {
+        for (piece, transform) in piece_query.iter_mut() {
+            let piece_info = transform.to_scale_rotation_translation();
         }
     }
 }
