@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use board::{SelectedPiece, ChessPiece};
 
 mod board;
 mod common;
@@ -6,15 +7,46 @@ mod common;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_event::<board::PieceClickedEvent>()
         .add_startup_system(init)
         .add_startup_system(spawn_new_board)
         .add_system(click_pieces)
+        .add_system(set_selected_piece)
         .run();
+}
+
+fn set_selected_piece(
+    mut click_event: EventReader<board::PieceClickedEvent>,
+    selected_query: Query<&SelectedPiece>,
+    pieces_query: Query<&ChessPiece>
+) {
+    let mut clicked_pos: Option<(u8, u8)> = None;
+    for e in click_event.iter() {
+        clicked_pos = Some(e.position);
+    }
+
+    let mut clicked_piece: Option<&ChessPiece> = None;
+    match clicked_pos {
+        None => return,
+        Some(pos) => {
+            for piece in pieces_query.iter() {
+                if piece.position == pos {
+                    clicked_piece = Some(piece);
+                    break;
+                }
+            }
+        }
+    }
+
+    if let Some(piece) = clicked_piece {
+        println!("clicked piece {:?} {:?} at {}", piece.color, piece.piece, pos_to_str(piece.position));
+    }
 }
 
 fn click_pieces(
     piece_query: Query<(&board::ChessPiece, &GlobalTransform, &Sprite)>,
     camera_query: Query<(&Camera, &GlobalTransform), Without<board::ChessPiece>>,
+    mut piece_click_event_writer: EventWriter<board::PieceClickedEvent>,
     mouse_buttons: Res<Input<MouseButton>>,
     windows: Res<Windows>
 ) {
@@ -37,8 +69,7 @@ fn click_pieces(
                 pos.y > piece_info.2.y-sprite_height/2. &&
                 pos.y < piece_info.2.y+sprite_height/2. 
             {
-                println!("clicked piece {:?} {:?} at {:?}", piece.color, piece.piece, piece.position);
-                //send piece clicked event
+                piece_click_event_writer.send(board::PieceClickedEvent { position: piece.position });
                 return;
             }
         }
@@ -145,3 +176,12 @@ fn spawn_new_board(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
+fn pos_to_str(pos: (u8, u8)) -> String {
+    let mut str = String::from(
+        match pos.0 { 0 => "a", 1 => "b", 2 => "c", 3 => "d", 4 => "e", 5 => "f", 6 => "g", 7 => "h", _ => "err" }
+    );
+    str.push_str(
+        match pos.1 { 0 => "1", 1 => "2", 2 => "3", 3 => "4", 4 => "5", 5 => "6", 6 => "7", 7 => "8", _ => "err" }
+    );
+    return str;
+}

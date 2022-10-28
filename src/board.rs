@@ -102,3 +102,7 @@ pub(crate) struct SelectedPiece {
     pub piece: Option<&'static ChessPiece>,
     pub transform: Option<&'static mut Transform>
 }
+
+pub(crate) struct PieceClickedEvent {
+    pub position: (u8, u8)
+}
