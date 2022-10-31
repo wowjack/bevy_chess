@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use board::{SelectedPiece, ChessPiece};
+use board::{SelectedPiece, ChessPiece, MovePieceEvent, BoardTile, TileClickedEvent};
 
 mod board;
 mod common;
@@ -7,23 +7,26 @@ mod common;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_event::<board::PieceClickedEvent>()
+        .add_event::<TileClickedEvent>()
+        .add_event::<MovePieceEvent>()
+        .insert_resource(SelectedPiece { position: None })
         .add_startup_system(init)
         .add_startup_system(spawn_new_board)
-        .add_system(click_pieces)
+        .add_system(click_tile)
         .add_system(set_selected_piece)
+        .add_system(move_piece)
+        .add_system(move_piece_writer)
         .run();
 }
 
 fn set_selected_piece(
-    mut click_event: EventReader<board::PieceClickedEvent>,
-    selected_query: Query<&SelectedPiece>,
+    mut click_event: EventReader<TileClickedEvent>,
+    mut selected_res: ResMut<SelectedPiece>,
     pieces_query: Query<&ChessPiece>
 ) {
     let mut clicked_pos: Option<(u8, u8)> = None;
-    for e in click_event.iter() {
-        clicked_pos = Some(e.position);
-    }
+    click_event.iter().for_each(|e| clicked_pos = Some(e.position));
+
 
     let mut clicked_piece: Option<&ChessPiece> = None;
     match clicked_pos {
@@ -39,14 +42,54 @@ fn set_selected_piece(
     }
 
     if let Some(piece) = clicked_piece {
-        println!("clicked piece {:?} {:?} at {}", piece.color, piece.piece, pos_to_str(piece.position));
+        selected_res.position = Some(piece.position);
     }
 }
 
-fn click_pieces(
-    piece_query: Query<(&board::ChessPiece, &GlobalTransform, &Sprite)>,
-    camera_query: Query<(&Camera, &GlobalTransform), Without<board::ChessPiece>>,
-    mut piece_click_event_writer: EventWriter<board::PieceClickedEvent>,
+fn move_piece_writer(
+    mut move_event: EventWriter<MovePieceEvent>,
+    mut click_event: EventReader<TileClickedEvent>,
+    selected_piece: Res<SelectedPiece>
+) {
+    if let Some(pos) = selected_piece.position {
+        for e in click_event.iter() {
+            if pos != e.position {
+                move_event.send(MovePieceEvent { from: pos, to: e.position });
+                return;
+            }
+        }
+    }
+}
+
+fn move_piece(
+    mut move_event_reader: EventReader<MovePieceEvent>,
+    mut piece_query: Query<(&mut ChessPiece, &mut Transform), Without<BoardTile>>,
+    tile_query: Query<(&BoardTile, &Transform), Without<ChessPiece>>,
+    mut selected_piece_resource: ResMut<SelectedPiece>
+) {
+    for e in move_event_reader.iter() {
+        let mut selected_piece_o = None;
+        for (piece, transform) in piece_query.iter_mut() {
+            if piece.position == e.from { selected_piece_o = Some((piece, transform))}
+        }
+        let mut dest_tile_o = None;
+        for (tile, transform) in tile_query.iter() {
+            if tile.position == e.to { dest_tile_o = Some((tile, transform)) }
+        }
+
+        if let (Some((mut selected_piece, mut selected_transform)), Some((dest_tile, dest_transform))) = (selected_piece_o, dest_tile_o) {
+            selected_transform.translation.x = dest_transform.translation.x;
+            selected_transform.translation.y = dest_transform.translation.y;
+            selected_piece.position = dest_tile.position;
+            selected_piece_resource.position = None;
+        }
+    }
+}
+
+fn click_tile(
+    tile_query: Query<(&board::BoardTile, &GlobalTransform)>,
+    camera_query: Query<(&Camera, &GlobalTransform)>,
+    mut tile_click_writer: EventWriter<board::TileClickedEvent>,
     mouse_buttons: Res<Input<MouseButton>>,
     windows: Res<Windows>
 ) {
@@ -60,16 +103,16 @@ fn click_pieces(
 
     if mouse_buttons.just_pressed(MouseButton::Left) {
         let pos = common::mouse_pos_to_global(window, camera_query.single());
-        for (piece, transform, sprite) in piece_query.iter() {
-            let piece_info = transform.to_scale_rotation_translation();
-            let sprite_width = sprite.custom_size.unwrap().x;
-            let sprite_height = sprite.custom_size.unwrap().y;
-            if pos.x > piece_info.2.x-sprite_width/2. &&
-                pos.x < piece_info.2.x+sprite_width/2. &&
-                pos.y > piece_info.2.y-sprite_height/2. &&
-                pos.y < piece_info.2.y+sprite_height/2. 
+        for (tile, transform) in tile_query.iter() {
+            let tile_info = transform.to_scale_rotation_translation();
+            let sprite_width = tile_info.0.x;
+            let sprite_height = tile_info.0.y;
+            if pos.x > tile_info.2.x-sprite_width/2. &&
+                pos.x < tile_info.2.x+sprite_width/2. &&
+                pos.y > tile_info.2.y-sprite_height/2. &&
+                pos.y < tile_info.2.y+sprite_height/2. 
             {
-                piece_click_event_writer.send(board::PieceClickedEvent { position: piece.position });
+                tile_click_writer.send(board::TileClickedEvent { position: tile.position });
                 return;
             }
         }
@@ -170,10 +213,6 @@ fn spawn_new_board(mut commands: Commands, asset_server: Res<AssetServer>) {
                     }
                 }
             });
-    commands.spawn().insert(board::SelectedPiece {
-        piece: None,
-        transform: None
-    });
 }
 
 fn pos_to_str(pos: (u8, u8)) -> String {

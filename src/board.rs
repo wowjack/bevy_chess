@@ -99,10 +99,14 @@ impl BoardTile {
 
 #[derive(Component)]
 pub(crate) struct SelectedPiece {
-    pub piece: Option<&'static ChessPiece>,
-    pub transform: Option<&'static mut Transform>
+    pub position: Option<(u8, u8)>
 }
 
-pub(crate) struct PieceClickedEvent {
+pub(crate) struct TileClickedEvent {
     pub position: (u8, u8)
+}
+
+pub(crate) struct MovePieceEvent {
+    pub from: (u8, u8),
+    pub to: (u8, u8)
 }
